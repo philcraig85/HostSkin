@@ -2,8 +2,8 @@
 
 - HostSkin is an artwork, living research interface and dissemination apparatus.
 - Preserve artistic ambiguity, permeability, duration, withholding, drift and accumulation where they are productive.
-- Prefer function as form: every visible or structural element should exist because it performs an actual function.
-- Do not create functionality merely to represent a concept. Structure and interface behaviour should arise from an actual operational, research or public-use need.
+- Prefer function as form. Formal decisions may serve operational, perceptual, semiotic, temporal, relational or material functions. Every imposed form should be answerable to what it changes or enables in the encounter.
+- Do not create functionality merely to represent a concept, and do not borrow visual conventions simply to signify art, technology or research. Structure and interface behaviour should arise from actual conditions of the work.
 - Do not optimize for engagement, SEO, conversion, posting frequency, growth or commercial convention unless explicitly requested.
 - Waiting on Rain is currently the only public work.
 - Do not add past work, biography or portfolio structure unless a future function requires them.
