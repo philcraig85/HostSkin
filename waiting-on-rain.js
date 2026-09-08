@@ -2,12 +2,14 @@ const TRACE_VISIBLE_DURATION_MS = 6 * 60 * 60 * 1000;
 const TRACE_FADING_DURATION_MS = 18 * 60 * 60 * 1000;
 const TRACE_RESIDUE_AFTER_MS = TRACE_VISIBLE_DURATION_MS + TRACE_FADING_DURATION_MS;
 const TRACE_RECALCULATION_INTERVAL_MS = 60 * 1000;
+const STATE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 const traceContainer = document.querySelector('.waiting-on-rain-trace');
 const traceContent = document.querySelector('.waiting-on-rain-trace__content');
 const traceTimestamp = document.querySelector('.waiting-on-rain-trace__timestamp');
 
 let publishedTrace = null;
+let temporalRenderTimerStarted = false;
 
 function deterministicWordScore(word, index) {
   let hash = 2166136261;
@@ -84,21 +86,43 @@ function renderTrace() {
   );
 }
 
-fetch('waiting-on-rain-state.json')
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error(`Unable to load Waiting on Rain state: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then((state) => {
-    publishedTrace = state.publishedTrace;
-    renderTrace();
+function hideTrace() {
+  if (traceContainer) {
+    traceContainer.hidden = true;
+  }
+}
 
-    if (publishedTrace) {
-      window.setInterval(renderTrace, TRACE_RECALCULATION_INTERVAL_MS);
-    }
+function ensureTemporalRenderTimer() {
+  if (!temporalRenderTimerStarted) {
+    window.setInterval(renderTrace, TRACE_RECALCULATION_INTERVAL_MS);
+    temporalRenderTimerStarted = true;
+  }
+}
+
+function refreshState() {
+  return fetch(`waiting-on-rain-state.json?refresh=${Date.now()}`, {
+    cache: 'no-store',
   })
-  .catch(() => {
-    // An unavailable state leaves the empty trace container untouched.
-  });
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Unable to load Waiting on Rain state: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((state) => {
+      publishedTrace = state.publishedTrace;
+
+      if (publishedTrace) {
+        renderTrace();
+        ensureTemporalRenderTimer();
+      } else {
+        hideTrace();
+      }
+    })
+    .catch(() => {
+      // A failed refresh leaves the last successfully loaded state untouched.
+    });
+}
+
+refreshState();
+window.setInterval(refreshState, STATE_REFRESH_INTERVAL_MS);
