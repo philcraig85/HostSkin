@@ -27,6 +27,30 @@ article {
   gap: 0.5rem;
 }
 
+.waiting-on-rain-trace[hidden] {
+  display: none;
+}
+
+.waiting-on-rain-trace {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.waiting-on-rain-trace__content {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.waiting-on-rain-trace__redacted-word {
+  display: inline-block;
+  color: transparent;
+  background: #000;
+}
+
+.waiting-on-rain-trace__timestamp {
+  margin: 0;
+}
+
 h2 {
   font-size: 1.5rem;
 }
