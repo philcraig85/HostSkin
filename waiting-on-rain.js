@@ -7,6 +7,7 @@ const STATE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const traceContainer = document.querySelector('.waiting-on-rain-trace');
 const traceContent = document.querySelector('.waiting-on-rain-trace__content');
 const traceTimestamp = document.querySelector('.waiting-on-rain-trace__timestamp');
+const waitingField = document.querySelector('.waiting-on-rain-waiting');
 
 let publishedTrace = null;
 let temporalRenderTimerStarted = false;
@@ -92,6 +93,12 @@ function hideTrace() {
   }
 }
 
+function renderWaitingState() {
+  if (waitingField) {
+    waitingField.hidden = publishedTrace !== null;
+  }
+}
+
 function ensureTemporalRenderTimer() {
   if (!temporalRenderTimerStarted) {
     window.setInterval(renderTrace, TRACE_RECALCULATION_INTERVAL_MS);
@@ -111,6 +118,7 @@ function refreshState() {
     })
     .then((state) => {
       publishedTrace = state.publishedTrace;
+      renderWaitingState();
 
       if (publishedTrace) {
         renderTrace();

@@ -31,6 +31,73 @@ article {
   display: none;
 }
 
+.waiting-on-rain-waiting[hidden] {
+  display: none;
+}
+
+.waiting-on-rain-waiting {
+  display: grid;
+  grid-template-columns: repeat(3, 0.5rem);
+  gap: 0.25rem;
+  width: max-content;
+  line-height: 1;
+}
+
+.waiting-on-rain-waiting span {
+  animation: waiting-on-rain-dot 12s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+.waiting-on-rain-waiting span:nth-child(2) {
+  animation-delay: -10.5s;
+}
+
+.waiting-on-rain-waiting span:nth-child(3) {
+  animation-delay: -9s;
+}
+
+.waiting-on-rain-waiting span:nth-child(4) {
+  animation-delay: -7.5s;
+}
+
+.waiting-on-rain-waiting span:nth-child(5) {
+  animation-delay: -6s;
+}
+
+.waiting-on-rain-waiting span:nth-child(6) {
+  animation-delay: -4.5s;
+}
+
+.waiting-on-rain-waiting span:nth-child(7) {
+  animation-delay: -3s;
+}
+
+.waiting-on-rain-waiting span:nth-child(8) {
+  animation-delay: -1.5s;
+}
+
+@keyframes waiting-on-rain-dot {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  12.5% {
+    opacity: 0.75;
+  }
+
+  25% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waiting-on-rain-waiting span {
+    animation: none;
+    opacity: 0.45;
+  }
+}
+
 .waiting-on-rain-trace {
   display: grid;
   gap: 0.5rem;
