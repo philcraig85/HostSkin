@@ -118,7 +118,7 @@ def validate_source(path):
     return source_bytes
 
 
-def require_clean_repository(repository, target):
+def require_clean_repository(repository, target, source_bytes):
     if not repository.exists() or not repository.is_dir():
         raise ValueError("HostSkin repository does not exist")
 
@@ -132,10 +132,20 @@ def require_clean_repository(repository, target):
     status = run_git(repository, "status", "--porcelain=v1")
     if status.returncode != 0:
         raise RuntimeError(f"unable to inspect repository status: {status.stderr.strip()}")
+    if not status.stdout:
+        return False
+
+    status_lines = status.stdout.splitlines()
+    if len(status_lines) == 1 and status_lines[0][3:] == TARGET_NAME:
+        if target.read_bytes() == source_bytes:
+            return True
+
     if status.stdout:
         raise ValueError(
             "repository has existing uncommitted changes; refusing to publish"
         )
+
+    return False
 
 
 def atomic_copy(source_bytes, target):
@@ -185,7 +195,7 @@ def main():
     repository = args.hostskin_repository
     target = repository / TARGET_NAME
     try:
-        require_clean_repository(repository, target)
+        recoverable_dirty = require_clean_repository(repository, target, source_bytes)
     except (OSError, RuntimeError, ValueError) as error:
         print(f"Refusing to publish: {error}", file=sys.stderr)
         return 1
@@ -196,7 +206,7 @@ def main():
         print(f"Refusing to publish: {error}", file=sys.stderr)
         return 1
 
-    if source_bytes == target.read_bytes():
+    if not recoverable_dirty and source_bytes == target.read_bytes():
         if not ahead_commits:
             print("public state already current")
             return 0
@@ -225,19 +235,20 @@ def main():
         )
         return 1
 
-    try:
-        atomic_copy(source_bytes, target)
-    except OSError as error:
-        print(f"Unable to write public state: {error}", file=sys.stderr)
-        return 1
+    if not recoverable_dirty:
+        try:
+            atomic_copy(source_bytes, target)
+        except OSError as error:
+            print(f"Unable to write public state: {error}", file=sys.stderr)
+            return 1
 
-    diff = run_git(repository, "diff", "--quiet", "--", TARGET_NAME)
-    if diff.returncode == 0:
-        print("public state already current")
-        return 0
-    if diff.returncode != 1:
-        print(f"Unable to inspect public state diff: {diff.stderr.strip()}", file=sys.stderr)
-        return 1
+        diff = run_git(repository, "diff", "--quiet", "--", TARGET_NAME)
+        if diff.returncode == 0:
+            print("public state already current")
+            return 0
+        if diff.returncode != 1:
+            print(f"Unable to inspect public state diff: {diff.stderr.strip()}", file=sys.stderr)
+            return 1
 
     staged = run_git(repository, "add", "--", TARGET_NAME)
     if staged.returncode != 0:
